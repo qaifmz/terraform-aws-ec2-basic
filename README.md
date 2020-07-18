@@ -43,6 +43,12 @@ module "this" {
 No issue is creating limit on this module.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 0.12 |
+
 ## Providers
 
 | Name | Version |
@@ -50,11 +56,12 @@ No issue is creating limit on this module.
 | aws | n/a |
 | random | n/a |
 | template | n/a |
+| tls | n/a |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:-----:|
+|------|-------------|------|---------|:--------:|
 | ami\_id | n/a | `string` | `""` | no |
 | create | Boolean to determine if you should create the instance or destroy all associated resources | `bool` | `true` | no |
 | create\_eip | Optional ability to create elastic IP | `bool` | `false` | no |
@@ -76,6 +83,7 @@ No issue is creating limit on this module.
 | local\_public\_key | n/a | `string` | `""` | no |
 | monitoring | Send logs and metrics to cloudwatch | `bool` | `true` | no |
 | name | The name to be used in tags | `any` | n/a | yes |
+| number\_of\_instances | Number of instances to create and attach to ELB | `number` | `1` | no |
 | root\_volume\_size | n/a | `number` | `8` | no |
 | subnet\_id | Supply both vpc\_id and subnet\_id or deploy into default vpc | `string` | `""` | no |
 | tags | Tags that are appended | `map(string)` | `{}` | no |
@@ -83,7 +91,7 @@ No issue is creating limit on this module.
 | user\_data\_script | n/a | `string` | `"user_data_ubuntu_ebs.sh"` | no |
 | volume\_path | n/a | `string` | `"/dev/sdf"` | no |
 | vpc\_id | Supply both vpc\_id and subnet\_id or deploy into default vpc | `string` | `""` | no |
-| vpc\_security\_group\_ids | A list of provided descurity group IDs | `list(string)` | n/a | yes |
+| vpc\_security\_group\_ids | A list of provided descurity group IDs | `list(string)` | `null` | no |
 
 ## Outputs
 

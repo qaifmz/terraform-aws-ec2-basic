@@ -86,7 +86,7 @@ data "template_file" "user_data" {
 variable "vpc_name" {
   description = "The name of the VPC"
   type        = string
-  default     = ""
+  default     = "default"
 }
 
 variable "azs" {

@@ -34,7 +34,7 @@ resource "aws_instance" "this" {
 
   user_data = var.user_data == "" ? data.template_file.user_data.rendered : var.user_data
 
-  subnet_id = var.subnet_id == "" ? values(zipmap(data.aws_subnet.default.*.availability_zone, data.aws_subnet.default.*.id))[0] : var.subnet_id
+  subnet_id = module.vpc.public_subnets[0]
 
   vpc_security_group_ids = var.vpc_security_group_ids == null ? [module.security_group.this_security_group_id] : var.vpc_security_group_ids
 
@@ -69,19 +69,90 @@ data "template_file" "user_data" {
 # default vpc
 #############
 
-resource "aws_default_vpc" "this" {}
+# resource "aws_default_vpc" "this" {}
 
-data "aws_vpc" "default" {
-  default = true
+# data "aws_vpc" "default" {
+#   default = true
+# }
+
+# data "aws_subnet_ids" "default" {
+#   vpc_id = data.aws_vpc.default.id
+# }
+
+# data "aws_subnet" "default" {
+#   count = length(data.aws_subnet_ids.default.ids)
+#   id    = tolist(data.aws_subnet_ids.default.ids)[count.index]
+# }
+variable "vpc_name" {
+  description = "The name of the VPC"
+  type        = string
+  default     = ""
 }
 
-data "aws_subnet_ids" "default" {
-  vpc_id = data.aws_vpc.default.id
+variable "azs" {
+  description = "List of availability zones"
+  type        = list(string)
+  default     = []
 }
 
-data "aws_subnet" "default" {
-  count = length(data.aws_subnet_ids.default.ids)
-  id    = tolist(data.aws_subnet_ids.default.ids)[count.index]
+variable "num_azs" {
+  description = "The number of AZs to deploy into"
+  type        = number
+  default     = 3
+}
+
+variable "cidr" {
+  description = "The cidr range for network"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+locals {
+  //    Logic for AZs is azs variable > az_num variable > max azs for region
+  az_num = chunklist(data.aws_availability_zones.available.names, var.num_azs)[0]
+  az_max = data.aws_availability_zones.available.names
+  azs    = coalescelist(var.azs, local.az_num, local.az_max)
+
+  num_azs      = length(local.azs)
+  subnet_num   = 2
+  subnet_count = local.subnet_num * local.num_azs
+
+  subnet_bits = ceil(log(local.subnet_count, 2))
+
+  public_subnets = [for subnet_num in range(local.num_azs) : cidrsubnet(
+    var.cidr,
+    local.subnet_bits,
+  subnet_num)]
+
+  private_subnets = [for subnet_num in range(local.num_azs) : cidrsubnet(
+    var.cidr,
+    local.subnet_bits,
+    local.num_azs + subnet_num,
+  )]
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+module "vpc" {
+  source = "github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v2.15.0"
+  name   = var.vpc_name
+
+  tags = var.tags
+
+  enable_nat_gateway     = false
+  single_nat_gateway     = false
+  one_nat_gateway_per_az = false
+
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+
+  azs  = local.azs
+  cidr = var.cidr
+
+  public_subnets  = local.public_subnets
+  private_subnets = local.private_subnets
 }
 
 #################
@@ -97,7 +168,7 @@ module "security_group" {
   name        = "${var.name}-${random_pet.this.id}"
   description = "Default security group if no security groups ids are supplied"
 
-  vpc_id = var.vpc_id == "" ? aws_default_vpc.this.id : var.vpc_id
+  vpc_id = module.vpc.name
 
   ingress_rules = var.ingress_rules
   egress_rules  = var.egress_rules
@@ -317,7 +388,7 @@ module "elb" {
 
   name = "elb"
 
-  subnets         = [var.subnet_id == "" ? values(zipmap(data.aws_subnet.default.*.availability_zone, data.aws_subnet.default.*.id))[0] : var.subnet_id]
+  subnets         = module.vpc.public_subnets
   security_groups = var.vpc_security_group_ids == null ? [module.security_group.this_security_group_id] : var.vpc_security_group_ids
   internal        = false
 

@@ -1,5 +1,14 @@
 variable "name" {
+  default     = "amz"
   description = "The name to be used in tags"
+}
+
+variable "aws_region" {
+  default = "us-west-2"
+}
+
+provider "aws" {
+  region = var.aws_region
 }
 
 variable "tags" {

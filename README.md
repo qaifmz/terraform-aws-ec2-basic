@@ -123,11 +123,11 @@ To run them:
 
 ## Authors
 
-Module managed by [robc-io](github.com/robc-io)
+Module managed by [qaifmz](github.com/qaifmz)
 
 ## Credits
 
-- [Anton Babenko](https://github.com/antonbabenko)
+- [robc-io](github.com/robc-io)
 
 ## License
 

@@ -1,3 +1,7 @@
+[![Build Status](https://img.shields.io/circleci/build/github/qaifmz/terraform-aws-ec2-basic?style=for-the-badge)](https://app.circleci.com/pipelines/github/qaifmz/terraform-aws-ec2-basic?branch=master)
+[![open-issues](https://img.shields.io/github/issues/qaifmz/terraform-aws-ec2-basic?style=for-the-badge)](https://github.com/qaifmz/terraform-aws-ec2-basic/issues)
+[![open-pr](https://img.shields.io/github/issues-pr/qaifmz/terraform-aws-ec2-basic?style=for-the-badge)](https://github.com/qaifmz/terraform-aws-ec2-basic/pulls)
+
 # terraform-aws-ec2-basic
 
 Terraform module to run a basic ec2 on AWS with some basic defaults.
